@@ -15,10 +15,12 @@ public class BookService {
 
 	private BookRepository repository;
 	private NotificationService notificationService;
+	private LineBreaker lineBreaker;
 
-	public BookService(BookRepository repository, NotificationService notificationService){
+	public BookService(BookRepository repository, NotificationService notificationService, LineBreaker lineBreaker) {
 		this.repository = repository;
 		this.notificationService = notificationService;
+		this.lineBreaker = lineBreaker;
 	}
 
 	public Optional<Book> findOne(long id) {
@@ -34,7 +36,8 @@ public class BookService {
 	}
 
 	public Book save(Book book) {
-		Book newBook = repository.save(book);
+		Book bookWithLinesBreaked = new Book(book.getTitle(), lineBreaker.breakLine(book.getDescription(), 10));
+		Book newBook = repository.save(bookWithLinesBreaked);
 		notificationService.notify("Book Event: book with title="+newBook.getTitle()+" was created");
 		return newBook;
 	}
